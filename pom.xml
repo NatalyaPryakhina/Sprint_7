@@ -17,12 +17,21 @@
     </properties>
 
     <dependencies>
+        <!-- Lombok для генерации кода (@Data, @AllArgsConstructor) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- RestAssured для тестирования API -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>5.3.0</version>
         </dependency>
+
         <!-- JUnit 4 -->
         <dependency>
             <groupId>junit</groupId>
@@ -30,6 +39,7 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+
         <!-- Allure JUnit 4 -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
@@ -50,6 +60,7 @@
             <artifactId>allure-rest-assured</artifactId>
             <version>${allure.version}</version>
         </dependency>
+
         <!-- Библиотека для работы с JSON (Gson) -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -82,9 +93,6 @@
                         </property>
                     </systemProperties>
                 </configuration>
-                <dependencies>
-
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>io.qameta.allure</groupId>

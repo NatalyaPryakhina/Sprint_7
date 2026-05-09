@@ -3,6 +3,7 @@ package client;
 import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
 import model.Courier;
+import model.CourierCredentials;
 
 import static io.restassured.RestAssured.given;
 
@@ -23,11 +24,12 @@ public class CourierClient {
 
     @Step("Авторизация курьера с логином {login}")
     public ValidatableResponse login(String login, String password) {
-        // Используем Map для формирования JSON "на лету"
-        var credentials = java.util.Map.of("login", login, "password", password);
+
+        CourierCredentials credentials = new CourierCredentials(login, password);
+
         return given()
                 .header("Content-type", "application/json")
-                .body(credentials)
+                .body(credentials) // RestAssured автоматически сериализует POJO-объект в JSON
                 .when()
                 .post(LOGIN_PATH)
                 .then();

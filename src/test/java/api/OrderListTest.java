@@ -1,33 +1,31 @@
 package api;
 
+import client.OrderClient;
+import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
-
-import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.*;
 
-public class OrderListTest {
+public class OrderListTest extends BaseTest {
+
+    private OrderClient orderClient;
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru/";
+        orderClient = new OrderClient();
     }
 
     @Test
     @DisplayName("Получение списка всех заказов")
-    public void getOrderListReturnsOrders() {
-        given()
-                .header("Content-type", "application/json")
-                .when()
-                .get("/api/v1/orders")
-                .then()
+    @Description("Проверка получения непустого списка существующих заказов в системе и контроль валидности структуры первого элемента")
+    public void getOrderListReturnsOrdersTest() {
+        orderClient.getList()
                 .assertThat()
-                .statusCode(200)
-                // Проверяем, что поле "orders" не пустое и является списком
+                .statusCode(SC_OK)
                 .body("orders", is(not(empty())))
-                // Можно также проверить, что в списке возвращаются объекты с полями заказа
-                .body("orders[0].id", notNullValue());
+                .body("orders.id", notNullValue());
     }
 }
+

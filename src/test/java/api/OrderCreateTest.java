@@ -1,32 +1,34 @@
 package api;
 
+import client.OrderClient;
+import model.Order;
+import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import java.util.List;
-
-import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(Parameterized.class)
-public class OrderCreateTest {
+public class OrderCreateTest extends BaseTest {
 
     private final List<String> color;
+    private OrderClient orderClient;
+    private int orderTrack;
 
-    // Конструктор принимает набор цветов для текущего теста
     public OrderCreateTest(List<String> color) {
         this.color = color;
     }
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru/";
+        orderClient = new OrderClient();
     }
 
-    // Данные для теста: BLACK, GREY, оба, ни одного
     @Parameterized.Parameters(name = "Тест с цветом: {0}")
     public static Object[][] getOrderData() {
         return new Object[][]{
@@ -39,54 +41,36 @@ public class OrderCreateTest {
 
     @Test
     @DisplayName("Создание заказа с разными вариантами цветов")
-    public void createOrderWithDifferentColors() {
-        // Создаем тело запроса (в реальном проекте лучше использовать POJO класс Order)
-        OrderJson body = new OrderJson(
+    @Description("Параметризованный тест: проверка успешного создания заказа в Самокате с выбором одного цвета, нескольких цветов или без указания цвета вообще")
+    public void createOrderWithDifferentColorsTest() {
+        Order order = new Order(
                 "Naruto",
                 "Uzumaki",
                 "Konoha, 142",
                 "4",
                 "+7 800 355 35 35",
                 5,
-                "2024-07-07",
+                "2026-07-07",
                 "Saske, come back!",
                 color
         );
 
-        given()
-                .header("Content-type", "application/json")
-                .body(body)
-                .when()
-                .post("/api/v1/orders")
-                .then()
+        orderTrack = orderClient.create(order)
                 .assertThat()
-                .statusCode(201)
-                .body("track", notNullValue());
+                .statusCode(SC_CREATED)
+                .body("track", notNullValue())
+                .extract()
+                .path("track");
     }
 
-    // Вспомогательный статический класс для тела заказа (вместо отдельного файла)
-    static class OrderJson {
-        public String firstName;
-        public String lastName;
-        public String address;
-        public String metroStation;
-        public String phone;
-        public int rentTime;
-        public String deliveryDate;
-        public String comment;
-        public List<String> color;
+    @After
+    public void tearDown() {
+        if (orderTrack != 0) {
+            try {
+                orderClient.cancel(orderTrack);
+            } catch (Exception e) {
 
-        public OrderJson(String firstName, String lastName, String address, String metroStation, String phone, int rentTime, String deliveryDate, String comment, List<String> color) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.address = address;
-            this.metroStation = metroStation;
-            this.phone = phone;
-            this.rentTime = rentTime;
-            this.deliveryDate = deliveryDate;
-            this.comment = comment;
-            this.color = color;
+            }
         }
     }
 }
-
